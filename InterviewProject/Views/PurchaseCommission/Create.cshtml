@@ -1,0 +1,459 @@
+﻿@model InterviewProject.Entities.PurchaseCommission
+@using InterviewProject.Entities
+
+@{
+    ViewData["Title"] = "فرم کمیسیون خرید";
+    var sellers = ViewBag.Sellers as List<Customer> ?? new List<Customer>();
+    if (!sellers.Any())
+    {
+        sellers = new List<Customer> { new Customer { Name = "فروشنده پیش فرض" } };
+    }
+}
+
+<div class="rtl-form">
+    <h1 class="text-right">فرم کمیسیون خرید</h1>
+    <hr />
+    <div class="row">
+        <div class="col-md-12">
+            <form asp-action="Create" id="purchaseForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger text-right"></div>
+
+                <div class="row">
+
+                    <div class="col-md-2">
+                        <div class="form-group text-right">
+                            <label class="control-label">تاریخ</label>
+                            <input asp-for="PersianCurrentDate"
+                                   class="form-control main-datepicker"
+                                   type="text"
+                                   dir="rtl"
+                                   required />
+                            <input type="hidden" asp-for="CurrentDate" />
+                            <span asp-validation-for="PersianCurrentDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-2">
+                        <div class="form-group text-right">
+                            <label class="control-label">کد کالا</label>
+                            <input asp-for="ProductCode" class="form-control text-right no-spin" dir="rtl" required />
+                            <span asp-validation-for="ProductCode" class="text-danger"></span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-2">
+                        <div class="form-group text-right">
+                            <label class="control-label">شرح کالا</label>
+                            <input asp-for="ProductDescription" class="form-control text-right" dir="rtl" required />
+                            <span asp-validation-for="ProductDescription" class="text-danger"></span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-2">
+                        <div class="form-group text-right">
+                            <label class="control-label">شماره سفارش</label>
+                            <select asp-for="OrderId" class="form-control text-right" asp-items="ViewBag.Orders" dir="rtl" required>
+                                <option value="">-- انتخاب سفارش --</option>
+                            </select>
+                            <span asp-validation-for="OrderId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-2">
+                        <div class="form-group text-right">
+                            <label class="control-label">مقدار</label>
+                            <input asp-for="Quantity" class="form-control text-right" dir="rtl" required min="1" />
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-2">
+                        <div class="form-group text-right">
+                            <label class="control-label">تاریخ مورد نیاز</label>
+                            <input asp-for="PersianRequiredDate"
+                                   class="form-control main-datepicker"
+                                   type="text"
+                                   dir="rtl"
+                                   required />
+                            <input type="hidden" asp-for="RequiredDate" />
+                            <span asp-validation-for="PersianRequiredDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group text-right">
+                            <label class="control-label">نظریه کارشناسی</label>
+                            <textarea asp-for="Description" class="form-control text-right" dir="rtl" style="height: 100px;"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group text-right">
+                            <label class="control-label">توضیحات</label>
+                            <textarea asp-for="Comment" class="form-control text-right" dir="rtl" style="height: 100px;"></textarea>
+                            <span asp-validation-for="Comment" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4 text-right">
+                    <div class="card-header">
+                        <h5>فیلدهای دیتیل</h5>
+                    </div>
+                    <div class="card-body" id="customers-container">
+                    </div>
+                    <div class="card-footer text-right">
+                        <button type="button" class="btn btn-secondary" id="add-customer-btn">
+                            <i class="fas fa-plus"></i> افزودن مشتری
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group mt-4 text-right">
+                    <button type="submit" class="btn btn-primary">ثبت</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link href="~/lib/persian-datepicker/persian-datepicker.min.css" rel="stylesheet" />
+    <style>
+        .rtl-form {
+            direction: rtl;
+            text-align: right;
+            font-family: 'B Nazanin', Tahoma;
+        }
+
+        .form-control, .persian-datepicker {
+            text-align: right;
+        }
+
+        select.form-control {
+            text-align-last: right;
+        }
+
+        .customer-row {
+            direction: rtl;
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .card-header h5 {
+            text-align: right;
+        }
+
+        .datepicker-plot-area {
+            font-family: 'B Nazanin', Tahoma !important;
+        }
+
+        .remove-customer-btn {
+            margin-top: 10px;
+        }
+
+        input[type="number"].no-spin::-webkit-inner-spin-button,
+        input[type="number"].no-spin::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"].no-spin {
+            -moz-appearance: textfield;
+        }
+    </style>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="~/lib/persian-datepicker/persian-date.min.js"></script>
+    <script src="~/lib/persian-datepicker/persian-datepicker.min.js"></script>
+
+    <script>
+                       $(document).ready(function() {
+
+            initializeDatepickers();
+
+
+            addCustomerRow(0);
+
+
+            setupEventHandlers();
+        });
+
+
+        function initializeDatepickers() {
+
+            $('.main-datepicker').each(function() {
+                initializeSingleDatepicker($(this));
+            });
+
+            $('.delivery-datepicker, .last-purchase-datepicker').each(function() {
+                initializeSingleDatepicker($(this));
+            });
+        }
+
+
+        function initializeSingleDatepicker(element) {
+            element.persianDatepicker({
+                format: 'YYYY/MM/DD',
+                observer: true,
+                autoClose: true,
+                initialValue: false,
+                persianDigit: true,
+                calendar: {
+                    persian: {
+                        locale: 'fa',
+                        showHint: true
+                    }
+                },
+                onSelect: function() {
+                    updateGregorianDate($(this));
+                }
+            });
+
+
+            if (element.val()) {
+                updateGregorianDate(element);
+            }
+        }
+
+
+        function setupEventHandlers() {
+
+            $('#add-customer-btn').on('click', function() {
+                const index = $('.customer-row').length;
+                addCustomerRow(index);
+            });
+
+
+            $('#customers-container').on('click', '.remove-customer-btn', function() {
+                if ($('.customer-row').length > 1) {
+                    $(this).closest('.customer-row').remove();
+                    reindexCustomerRows();
+                } else {
+                    alert('حداقل یک فروشنده باید وجود داشته باشد');
+                }
+            });
+
+            // Calculate total price
+            $('#customers-container').on('change', 'input[name*="Quantity"], input[name*="Price"]', function() {
+                calculateTotalPrice($(this).closest('.customer-row'));
+            });
+
+
+            $('#purchaseForm').on('submit', function(e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+
+        function addCustomerRow(index) {
+
+            const sellerOptions = @Html.Raw(Json.Serialize(sellers.Select(s => new { Id = s.Id, Name = s.Name })));
+
+            const html = `
+                <div class="customer-row border p-3 mb-3 text-right" dir="rtl">
+                    <!-- Seller and Quantity -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">نام فروشنده</label>
+                                <select name="PurchaseCommissionCustomers[${index}].SellerId"
+                                        class="form-control seller-select text-right"
+                                        dir="rtl" required>
+                                    <option value="">-- انتخاب فروشنده --</option>
+                                    ${sellerOptions.map(seller => `
+                                        <option value="${seller.id}">${seller.name}</option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">مقدار</label>
+                                <input name="PurchaseCommissionCustomers[${index}].Quantity"
+                                       class="form-control text-right"
+                                       type="number"
+                                       dir="rtl"
+                                       required min="1" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Price and Total -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">فی (ریال)</label>
+                                <input name="PurchaseCommissionCustomers[${index}].Price"
+                                       class="form-control text-right"
+                                       dir="rtl"
+                                       required min="0" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">مبلغ کل</label>
+                                <input name="PurchaseCommissionCustomers[${index}].TotalPrice"
+                                       class="form-control text-right"
+                                       readonly required dir="rtl" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Date and Purchase Condition -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">زمان تحویل</label>
+                                <input name="PurchaseCommissionCustomers[${index}].PersianDeliveryDate"
+                                       class="form-control delivery-datepicker"
+                                       type="text"
+                                       dir="rtl"
+                                       required />
+                                <input type="hidden" name="PurchaseCommissionCustomers[${index}].DeliveryDate" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">شرایط پرداخت</label>
+                                <input name="PurchaseCommissionCustomers[${index}].PurchaseCondition"
+                                       class="form-control text-right"
+                                       dir="rtl" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Producer and Last Purchase Date -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">نام تولید کننده</label>
+                                <input name="PurchaseCommissionCustomers[${index}].ProducerName"
+                                       class="form-control text-right"
+                                       dir="rtl" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">تاریخ آخرین خرید</label>
+                                <input name="PurchaseCommissionCustomers[${index}].PersianLastPurchaseDate"
+                                       class="form-control last-purchase-datepicker"
+                                       type="text"
+                                       dir="rtl" />
+                                <input type="hidden" name="PurchaseCommissionCustomers[${index}].LastPurchaseDate" />
+                            </div>
+                        </div>
+                    </div>
+
+                    ${index > 0 ? `
+                        <button type="button" class="btn btn-danger btn-sm remove-customer-btn">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+
+            $('#customers-container').append(html);
+
+
+            $('.delivery-datepicker').not('.initialized').last().addClass('initialized').each(function() {
+                initializeSingleDatepicker($(this));
+            });
+
+            $('.last-purchase-datepicker').not('.initialized').last().addClass('initialized').each(function() {
+                initializeSingleDatepicker($(this));
+            });
+        }
+
+
+        function updateGregorianDate(element) {
+            const persianDate = element.val();
+            const hiddenField = element.siblings('input[type="hidden"]');
+
+            if (!persianDate) {
+                hiddenField.val('');
+                return;
+            }
+
+            try {
+                const dateArray = persianDate.split('/');
+                if (dateArray.length !== 3) {
+                    console.error('Invalid date format');
+                    hiddenField.val('');
+                    return;
+                }
+
+                const gregorianDate = new persianDate({
+                    year: parseInt(dateArray[0]),
+                    month: parseInt(dateArray[1]),
+                    day: parseInt(dateArray[2])
+                }).toGregorian();
+
+                hiddenField.val(gregorianDate.toISOString());
+            } catch (e) {
+                console.error('Date conversion error:', e);
+                hiddenField.val('');
+            }
+        }
+
+
+        function reindexCustomerRows() {
+            $('.customer-row').each(function(index) {
+                $(this).find('[name]').each(function() {
+                    const name = $(this).attr('name').replace(/\[\d+\]/, `[${index}]`);
+                    $(this).attr('name', name);
+                });
+            });
+        }
+
+
+        function calculateTotalPrice(row) {
+            const quantity = parseFloat(row.find('input[name*="Quantity"]').val()) || 0;
+            const price = parseFloat(row.find('input[name*="Price"]').val()) || 0;
+            row.find('input[name*="TotalPrice"]').val((quantity * price).toLocaleString('fa-IR'));
+        }
+
+
+        function validateForm() {
+
+            $('.main-datepicker, .delivery-datepicker, .last-purchase-datepicker').each(function() {
+                updateGregorianDate($(this));
+            });
+
+
+            const hasValidSeller = $('.seller-select').filter(function() {
+                return $(this).val();
+            }).length > 0;
+
+
+
+            let isValid = true;
+            $('[required]').each(function() {
+                if (!$(this).val()) {
+                    $(this).addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+
+            return isValid;
+        }
+    </script>
+}
