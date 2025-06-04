@@ -426,7 +426,7 @@
         function calculateTotalPrice(row) {
             const quantity = parseFloat(row.find('input[name*="Quantity"]').val()) || 0;
             const price = parseFloat(row.find('input[name*="Price"]').val()) || 0;
-            row.find('input[name*="TotalPrice"]').val((quantity * price).toLocaleString('fa-IR'));
+            row.find('input[name*="TotalPrice"]').val((quantity * price).toLocaleString());
         }
 
 
